@@ -6,7 +6,6 @@ tags:
   - GLS
   - FGLS
 ---
-
 ## 1. BLUE 4가지 가정
 
 $$Y_{it} = \alpha + \beta X_{it} + \epsilon_{it}$$
@@ -176,12 +175,81 @@ $D = 0$일 때만 등호 성립 → OLS와 동일한 추정량
 
 ---
 
+## 8. 로버스트 추정 (Robust SE) — $\hat{\beta}$는 그대로, SE 공식만 교체
+
+GLS/FGLS는 $\Omega$의 구조를 가정하고 **추정 자체를 바꾸는** 방법이었다면, 로버스트 추정은 전혀 다른 접근이다.
+
+> $\hat{\beta}_{OLS}$는 그대로 두고, **분산 추정 공식만 올바른 것으로 교체**한다.
+
+### 왜 이런 접근이 필요한가
+
+GLS/FGLS는 오차 구조를 특정 형태로 가정(AR(1) 등)해야 한다. 그 가정이 틀리면 오히려 더 나쁜 추정이 나올 수 있다. 로버스트 추정은 **$\Omega$의 구조를 전혀 가정하지 않고**, 잔차 자체로 분산을 직접 근사한다 — 가정이 틀릴 위험이 없다.
+
+### Sandwich Estimator
+
+OLS 분산 추정 공식은 $\Omega = I$를 전제하고 유도된 것:
+
+$$\widehat{Var(\hat{\beta})}_{OLS} = \hat{\sigma}^2(X^TX)^{-1}$$
+
+실제 분산 공식:
+
+$$Var(\hat{\beta}) = (X^TX)^{-1} \underbrace{X^T\Omega X}_{\text{이걸 모름}} (X^TX)^{-1}$$
+
+로버스트 추정은 모르는 $X^T\Omega X$ 부분을 잔차로 직접 근사:
+
+$$\widehat{Var(\hat{\beta})}_{robust} = (X^TX)^{-1} \underbrace{\left(\sum_t \hat{\epsilon}_t^2 x_t x_t^T\right)}_{\hat{\Omega} \text{ 근사}} (X^TX)^{-1}$$
+
+양쪽에 $(X^TX)^{-1}$이 끼어있는 모양 → **Sandwich Estimator**라고 부른다.
+
+### 종류별 차이
+
+**HC (Heteroskedasticity Consistent) — 이분산만**
+
+$$\widehat{X^T\Omega X} = \sum_{t=1}^T \hat{\epsilon}_t^2 x_t x_t^T$$
+
+각 관측치의 잔차 제곱으로 해당 시점의 분산을 근사. 자기상관은 고려하지 않아 인접 시점 간 항이 없다.
+
+**HAC (Heteroskedasticity and Autocorrelation Consistent) — 이분산 + 자기상관**
+
+$$\widehat{X^T\Omega X} = \sum_{t=1}^T \hat{\epsilon}_t^2 x_t x_t^T + \sum_{k=1}^{L} w_k \sum_t \hat{\epsilon}_t \hat{\epsilon}_{t-k}(x_t x_{t-k}^T + x_{t-k} x_t^T)$$
+
+인접 시점($k$시점 떨어진) 잔차 간 공분산 항을 추가로 더한다. $w_k$는 시차가 멀어질수록 줄어드는 가중치(Bartlett kernel 등). $L$은 최대 시차(bandwidth).
+
+- $k = 0$항만 쓰면 → HC와 동일
+- $k > 0$항 추가 → 자기상관까지 흡수
+
+**Clustered SE — 패널에서 개체 내 상관 전체 흡수**
+
+$$\widehat{X^T\Omega X} = \sum_{i=1}^{N} \left(\sum_{t=1}^T x_{it}\hat{\epsilon}_{it}\right)\left(\sum_{t=1}^T x_{it}\hat{\epsilon}_{it}\right)^T$$
+
+개체 i의 모든 시점 잔차를 **통째로 묶어서** 계산. AR(1)이든 AR(2)든 어떤 자기상관 구조든 상관없이 개체 내 상관을 가정 없이 흡수한다. 패널 데이터에서 가장 많이 쓰는 방식.
+
+### GLS vs 로버스트 SE 비교
+
+| | GLS / FGLS | 로버스트 SE |
+|---|---|---|
+| $\hat{\beta}$ | 재추정 (변환 후 OLS) | OLS 그대로 |
+| $\Omega$ 처리 | 구조 가정 후 파라미터 추정 | 구조 가정 없이 잔차로 직접 근사 |
+| 효율성 | 가정 맞으면 BLUE | OLS보다 효율성 낮음 |
+| 가정 틀리면 | 더 나빠질 수 있음 | 최소한 SE는 올바름 |
+| 실용성 | 오차 구조 명확할 때 | 구조 불확실하거나 보수적으로 갈 때 |
+
+### 핵심 트레이드오프
+
+- GLS/FGLS: 오차 구조를 **알고 활용** → 효율적이지만 가정이 틀리면 위험
+- 로버스트 SE: 오차 구조를 **모르지만 보험** → 효율성 포기, 대신 SE는 항상 올바름
+
+> **실무에서는** 오차 구조 확신이 없으면 로버스트 SE를 쓰는 게 안전하다. Stata에서 `vce(robust)` 또는 `vce(cluster id)` 옵션 하나로 해결된다.
+
+---
+
 ## 한 줄 정리
 
 - **OLS** — 오차 구조 무시, $\hat{\beta}$ 불편이지만 SE 틀림
 - **GLS** — 오차 구조를 AR(1) 등 특정 형태로 **가정**하고, 파라미터($\rho$ 등)를 잔차로 추정해 $\Omega^{-1/2}$ 변환 후 OLS
 - **FGLS** — $\Omega$를 완전히 특정할 수 없으므로 잔차로 $\hat{\Omega}$ 추정 후 대입하는 현실적 GLS
+- **로버스트 SE** — $\hat{\beta}$는 OLS 그대로, $\Omega$ 구조 가정 없이 잔차로 분산만 직접 근사
 
-$$\text{OLS} \xrightarrow{\Omega \neq I,\ SE\ \text{과소추정}} \underbrace{\text{오차 구조 가정}}_{\text{AR(1) 등}} \xrightarrow{\hat{\rho}\ \text{추정}} \text{FGLS} \approx \text{GLS}$$
+$$\text{OLS} \xrightarrow{\Omega \neq I} \begin{cases} \text{구조 가정 가능} & \rightarrow \text{FGLS} \\ \text{구조 불확실} & \rightarrow \text{로버스트 SE} \end{cases}$$
 
-> $\hat{\beta}$는 살리고 오차 구조를 반영해 **SE를 교정하거나 추정 자체를 개선**하는 것이 GLS/FGLS의 핵심
+> $\hat{\beta}$는 살리고 오차 구조를 반영해 **SE를 교정하거나 추정 자체를 개선**하는 것이 핵심 — 가정의 확신 정도에 따라 방법을 선택한다.
