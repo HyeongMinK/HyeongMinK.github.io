@@ -112,6 +112,29 @@ $$\hat{\beta}_{FGLS} = (X^T\hat{\Omega}^{-1}X)^{-1}X^T\hat{\Omega}^{-1}Y$$
 
 > **FGLS = Feasible GLS** — $\Omega$ 몰라도 잔차로 추정해서 쓰는 GLS
 
+### FGLS의 근본적 한계 — 순환 구조
+
+OLS 잔차 $\hat{\epsilon}$은 **$\Omega = I$라고 가정하고 추정한 결과**다. 즉 틀린 가정 하에서 나온 근사값으로 $\hat{\rho}$, $\hat{\sigma}_i^2$을 추정하는 것이라 엄밀히는 정확하지 않다.
+
+$$\underbrace{\hat{\beta}_{OLS}}_{\Omega=I \text{ 가정}} \rightarrow \underbrace{\hat{\epsilon}}_{\text{근사 잔차}} \rightarrow \underbrace{\hat{\rho},\ \hat{\sigma}_i^2}_{\text{편향된 추정}} \rightarrow \hat{\Omega} \rightarrow \hat{\beta}_{FGLS}$$
+
+각 단계마다 오류가 누적되는 구조.
+
+### 그럼에도 쓰는 이유 — 점근적 일치성
+
+표본이 충분히 크면 ($N, T \rightarrow \infty$):
+
+$$\hat{\epsilon} \rightarrow \epsilon, \quad \hat{\rho} \rightarrow \rho, \quad \hat{\Omega} \rightarrow \Omega$$
+
+즉 **소표본에서는 편향이 있지만 대표본에서는 GLS에 수렴**한다.
+
+| | 소표본 | 대표본 |
+|---|---|---|
+| GLS | BLUE | BLUE |
+| FGLS | 편향 가능 | **점근적 BLUE** |
+
+> FGLS는 엄밀히 **점근적으로(asymptotically) 효율적**이라고 표현한다 — 소표본에서는 보장 불가.
+
 ### 패널에서 추정 가능성
 
 | 가정 | 추정 파라미터 수 | 가능 여부 |
@@ -234,10 +257,25 @@ $$\widehat{X^T\Omega X} = \sum_{i=1}^{N} \left(\sum_{t=1}^T x_{it}\hat{\epsilon}
 | 가정 틀리면 | 더 나빠질 수 있음 | 최소한 SE는 올바름 |
 | 실용성 | 오차 구조 명확할 때 | 구조 불확실하거나 보수적으로 갈 때 |
 
+### 로버스트 SE가 고치는 것과 고치지 않는 것
+
+$$t = \frac{\hat{\beta}_{OLS}}{SE(\hat{\beta}_{OLS})}$$
+
+- 분자 $\hat{\beta}_{OLS}$ → **건드리지 않음**
+- 분모 $SE(\hat{\beta}_{OLS})$ → **올바른 공식으로 교체**
+
+즉 로버스트 SE는 추정의 효율성이나 $\hat{\beta}$의 정확성을 개선하는 게 아니라, **t검정이 제대로 작동하게 만드는 것**이 전부다.
+
+| | 개선하는가 |
+|---|---|
+| $\hat{\beta}$ 불편성 | ✗ |
+| $\hat{\beta}$ 효율성 | ✗ |
+| 검정의 신뢰성 | **✓** |
+
 ### 핵심 트레이드오프
 
-- GLS/FGLS: 오차 구조를 **알고 활용** → 효율적이지만 가정이 틀리면 위험
-- 로버스트 SE: 오차 구조를 **모르지만 보험** → 효율성 포기, 대신 SE는 항상 올바름
+- GLS/FGLS: 오차 구조를 **알고 활용** → 추정 효율성 개선, 가정이 틀리면 위험
+- 로버스트 SE: "추정은 포기하고 **검정만 제대로 하자**" → 효율성 포기, 대신 SE는 항상 올바름
 
 > **실무에서는** 오차 구조 확신이 없으면 로버스트 SE를 쓰는 게 안전하다. Stata에서 `vce(robust)` 또는 `vce(cluster id)` 옵션 하나로 해결된다.
 
