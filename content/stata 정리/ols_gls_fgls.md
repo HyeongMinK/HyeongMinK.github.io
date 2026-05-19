@@ -64,7 +64,8 @@ $$Var(\hat{\beta}) = Var\left((X^TX)^{-1}X^T\epsilon\right)$$
 
 $$Var(\hat{\beta}) = (X^TX)^{-1}X^T \cdot Var(\epsilon) \cdot X(X^TX)^{-1}$$
 
-> $A^T = ((X^TX)^{-1}X^T)^T = X(X^TX)^{-1}$ — $(X^TX)$가 대칭이라 역행렬도 대칭
+> $A^T = ((X^TX)^{-1}X^T)^T = X(X^TX)^{-1}$ 
+> $(X^TX)$가 대칭이라 역행렬도 대칭
 
 ### 핵심 결과 — Sandwich 형태의 출처
 
