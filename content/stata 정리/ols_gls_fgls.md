@@ -77,7 +77,14 @@ $\hat{\beta}$가 $\epsilon$의 선형 함수이기 때문에 **오차항 분산�
 - $Var(\epsilon) = \sigma^2 I$ (OLS 가정 성립) → $Var(\hat{\beta}) = \sigma^2(X^TX)^{-1}$ (익숙한 OLS 공식)
 - $Var(\epsilon) = \sigma^2\Omega$ (일반) → Sandwich 형태 그대로 유지
 
-> 가운데 $X^T\Omega X$를 **어떻게 처리하느냐**가 이후 GLS·FGLS·로버스트 SE의 갈림길이 된다.
+> 가운데 $X^T\Omega X$를 **어떻게 처리하느냐**가 이후 GLS·FGLS·로버스트 SE 선택
+
+| $\Omega$ 형태 | 문제 | 해결 |
+|---|---|---|
+| 대각, 원소 다름 | 이분산 | WLS |
+| 비대각 원소 존재 | 자기상관 | GLS |
+| RE 모형의 복합오차 $(u_i + e_{it})$ 구조 | 개체 내 시점 간 공분산 $\sigma_u^2 \neq 0$ | GLS |
+| 둘 다 | 이분산 + 자기상관 | GLS |
 
 ---
 
