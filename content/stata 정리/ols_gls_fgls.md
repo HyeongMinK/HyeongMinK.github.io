@@ -15,7 +15,7 @@ $$Y_{it} = \alpha + \beta X_{it} + \epsilon_{it}$$
 | 1 | $E(\epsilon_{it}) = 0$ | Unbiased | 추정량 편향 |
 | 2 | $Var(\epsilon_{it}) = \sigma^2$ | Best (등분산) | 효율성 손상 |
 | 3 | $Cov(\epsilon_{it}, \epsilon_{js}) = 0$ | Best (무상관) | 표준오차 틀림 |
-| 4 | $Cov(X_{it}, \epsilon_{it}) = 0$ | Unbiased | 추정량 편향 |
+| 4 | $Cov(X_{it}, \epsilon_{it}) = 0$ | Unbiased | 추정량 편향 (내생성) |
 
 > **BLUE** = Best Linear Unbiased Estimator
 > 가정 1·4 → 불편성 보장 / 가정 2·3 → 효율성(최소분산) 보장
