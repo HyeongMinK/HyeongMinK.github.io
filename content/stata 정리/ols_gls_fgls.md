@@ -83,10 +83,9 @@ $\hat{\beta}$가 $\epsilon$의 선형 함수이기 때문에 **오차항 분산�
 
 | $\Omega$ 형태 | 문제 | 해결 |
 |---|---|---|
-| 대각, 원소 다름 | 이분산 | WLS |
-| 비대각 원소 존재 | 자기상관 | GLS |
-| RE 모형의 복합오차 $(u_i + e_{it})$ 구조 | 개체 내 시점 간 공분산 $\sigma_u^2 \neq 0$ | GLS |
-| 둘 다 | 이분산 + 자기상관 | GLS |
+| 대각, 블록마다 $\sigma_i^2$ 다름 | **개체 간** 이분산 | WLS, FGLS |
+| 블록 내 대각 원소가 시점마다 다름 | **개체 내** 이분산 | Robust SE (추정 불가) |
+| 비대각 원소 존재 | 자기상관 | GLS, FGLS |
 
 ---
 
@@ -130,17 +129,17 @@ $\Omega^{-1/2}$ 변환 결과:
 
 $$Y_t - \rho Y_{t-1} = \beta(X_t - \rho X_{t-1}) + u_t$$
 
-$\rho$ **하나만 추정**하면 $\Omega$ 전체가 결정:
+$\rho$ **하나만 가정**하면 $\Omega$ 전체가 결정:
 
 $$\Omega_{ts} = Cov(\epsilon_t, \epsilon_s) = \rho^{|t-s|}\sigma^2$$
 
-### 패널에서 자기상관만 추정할 때
+### 패널에서 자기상관만 가정할 때
 
 $\Omega$는 블록 대각 구조:
 
 $$\Omega = \begin{pmatrix} \Omega_i & 0 & \cdots \\ 0 & \Omega_i & \cdots \\ \vdots & \vdots & \ddots \end{pmatrix}, \quad \Omega_i = \sigma^2\begin{pmatrix} 1 & \rho & \cdots & \rho^{T-1} \\ \rho & 1 & \cdots & \rho^{T-2} \\ \vdots & \vdots & \ddots & \vdots \\ \rho^{T-1} & \rho^{T-2} & \cdots & 1 \end{pmatrix}$$
 
-모든 개체에 동일한 $\rho$ 적용 → 추정 파라미터 **2개** ($\rho$, $\sigma^2$)
+모든 개체에 동일한 $\rho$ 적용 → 가정 파라미터 **2개** ($\rho$, $\sigma^2$)
 
 ---
 
@@ -252,48 +251,75 @@ GLS/FGLS는 $\Omega$의 구조를 가정하고 **추정 자체를 바꾸는** �
 
 > $\hat{\beta}_{OLS}$는 그대로 두고, **분산 추정 공식만 올바른 것으로 교체**한다.
 
+---
+
 ### 왜 이런 접근이 필요한가
 
-GLS/FGLS는 오차 구조를 특정 형태로 가정(AR(1) 등)해야 한다. 그 가정이 틀리면 오히려 더 나쁜 추정이 나올 수 있다. 로버스트 추정은 **$\Omega$의 구조를 전혀 가정하지 않고**, 잔차 자체로 분산을 직접 근사한다 — 가정이 틀릴 위험이 없다.
+GLS/FGLS는 오차 구조를 특정 형태로 가정(AR(1) 등)해야 한다. 그 가정이 틀리면 오히려 더 나쁜 추정이 나올 수 있다.
+
+로버스트 추정은 **$\Omega$의 구조를 전혀 가정하지 않고**, 잔차 자체로 분산을 직접 근사한다 — 가정이 틀릴 위험이 없다.
+
+---
 
 ### Sandwich Estimator
 
 OLS 분산 추정 공식은 $\Omega = I$를 전제하고 유도된 것:
 
-$$\widehat{Var(\hat{\beta})}_{OLS} = \hat{\sigma}^2(X^TX)^{-1}$$
+$$\widehat{\text{Var}(\hat{\beta})}_{OLS} = \hat{\sigma}^2(X^\top X)^{-1}$$
 
 실제 분산 공식:
 
-$$Var(\hat{\beta}) = (X^TX)^{-1} \underbrace{X^T\Omega X}_{\text{이걸 모름}} (X^TX)^{-1}$$
+$$\text{Var}(\hat{\beta}) = (X^\top X)^{-1} \underbrace{X^\top \Omega X}_{\text{이걸 모름}} (X^\top X)^{-1}$$
 
-로버스트 추정은 모르는 $X^T\Omega X$ 부분을 잔차로 직접 근사:
+로버스트 추정은 모르는 $X^\top \Omega X$ 부분을 잔차로 직접 근사:
 
-$$\widehat{Var(\hat{\beta})}_{robust} = (X^TX)^{-1} \underbrace{\left(\sum_t \hat{\epsilon}_t^2 x_t x_t^T\right)}_{\hat{\Omega} \text{ 근사}} (X^TX)^{-1}$$
+$$\widehat{\text{Var}(\hat{\beta})}_{robust} = (X^\top X)^{-1} \underbrace{\left(\sum_t \hat{\epsilon}_t^2 x_t x_t^\top\right)}_{\hat{\Omega} \text{ 근사}} (X^\top X)^{-1}$$
 
-양쪽에 $(X^TX)^{-1}$이 끼어있는 모양 → **Sandwich Estimator**라고 부른다.
+양쪽에 $(X^\top X)^{-1}$이 끼어있는 모양 → **Sandwich Estimator**
+
+---
 
 ### 종류별 차이
 
 **HC (Heteroskedasticity Consistent) — 이분산만**
 
-$$\widehat{X^T\Omega X} = \sum_{t=1}^T \hat{\epsilon}_t^2 x_t x_t^T$$
+$$\widehat{X^\top \Omega X} = \sum_{t=1}^T \hat{\epsilon}_t^2 x_t x_t^\top$$
 
-각 관측치의 잔차 제곱으로 해당 시점의 분산을 근사. 자기상관은 고려하지 않아 인접 시점 간 항이 없다.
+각 관측치의 잔차 제곱으로 분산을 근사. 자기상관 고려 안 함.
 
-**HAC (Heteroskedasticity and Autocorrelation Consistent) — 이분산 + 자기상관**
+**HAC (Heteroskedasticity and Autocorrelation Consistent) — 이분산 + 시계열 자기상관**
 
-$$\widehat{X^T\Omega X} = \sum_{t=1}^T \hat{\epsilon}_t^2 x_t x_t^T + \sum_{k=1}^{L} w_k \sum_t \hat{\epsilon}_t \hat{\epsilon}_{t-k}(x_t x_{t-k}^T + x_{t-k} x_t^T)$$
+$$\widehat{X^\top \Omega X} = \sum_{t=1}^T \hat{\epsilon}_t^2 x_t x_t^\top + \sum_{k=1}^{L} w_k \sum_t \hat{\epsilon}_t \hat{\epsilon}_{t-k}(x_t x_{t-k}^\top + x_{t-k} x_t^\top)$$
 
-인접 시점($k$시점 떨어진) 잔차 간 공분산 항을 추가로 더한다. $w_k$는 시차가 멀어질수록 줄어드는 가중치(Bartlett kernel 등). $L$은 최대 시차(bandwidth).
+인접 시점($k$시점 떨어진) 잔차 간 공분산 항을 추가. $w_k$ 는 시차가 멀어질수록 줄어드는 가중치(Bartlett kernel 등), $L$ 은 최대 시차(bandwidth).
 
-- $k = 0$항만 쓰면 → HC와 동일
-- $k > 0$항 추가 → 자기상관까지 흡수
+- $k = 0$ 항만 쓰면 → HC와 동일
+- $k > 0$ 항 추가 → 자기상관까지 흡수
 
-**Clustered SE — 패널에서 개체 내 상관 전체 흡수**
+**Clustered SE — 패널에서 가장 많이 쓰는 방식**
 
-$$\widehat{X^T\Omega X} = \sum_{i=1}^{N} \left(\sum_{t=1}^T x_{it}\hat{\epsilon}_{it}\right)\left(\sum_{t=1}^T x_{it}\hat{\epsilon}_{it}\right)^T$$
+$$\widehat{X^\top \Omega X} = \sum_{i=1}^{N} \left(\sum_{t=1}^T x_{it}\hat{\epsilon}_{it}\right)\left(\sum_{t=1}^T x_{it}\hat{\epsilon}_{it}\right)^\top$$
 
-개체 i의 모든 시점 잔차를 **통째로 묶어서** 계산. AR(1)이든 AR(2)든 어떤 자기상관 구조든 상관없이 개체 내 상관을 가정 없이 흡수한다. 패널 데이터에서 가장 많이 쓰는 방식.
+개체 $i$ 의 모든 시점 잔차를 **통째로 묶어서** $\hat{u}_i \hat{u}_i^\top$ ($T \times T$ 행렬) 형태로 합산.
+
+→ 개체 내 이분산, 개체 내 자기상관 (구조 무관), 개체 간 이분산까지 **SE 차원에서 모두 반영**
+
+→ 단, 개체 간 동시적 상관 $\text{Cov}(e_{it}, e_{jt})$, $i \neq j$ 는 처리 불가 (개체끼리 합산 시 독립 전제)
+
+---
+
+### Robust SE 의 정확한 처리 범위
+
+| 문제 | SE 차원 처리 | $\hat{\beta}$ 차원 (재가중) |
+|---|---|---|
+| 개체 내 이분산 $\sigma_{it}^2$ | ✓ (HC) | ✗ |
+| 개체 내 자기상관 | ✓ (HAC, Clustered) | ✗ |
+| 개체 간 이분산 $\sigma_i^2$ | ✓ (Clustered) | ✗ |
+| 개체 간 동시적 상관 | ✗ | ✗ |
+
+> **핵심:** Robust SE 는 다양한 오차 구조를 **SE 계산에서는 반영**하지만, $\hat{\beta}$ 자체를 GLS 처럼 재가중하여 효율화하지는 않는다.
+
+---
 
 ### GLS vs 로버스트 SE 비교
 
@@ -301,18 +327,18 @@ $$\widehat{X^T\Omega X} = \sum_{i=1}^{N} \left(\sum_{t=1}^T x_{it}\hat{\epsilon}
 |---|---|---|
 | $\hat{\beta}$ | 재추정 (변환 후 OLS) | OLS 그대로 |
 | $\Omega$ 처리 | 구조 가정 후 파라미터 추정 | 구조 가정 없이 잔차로 직접 근사 |
-| 효율성 | 가정 맞으면 BLUE | OLS보다 효율성 낮음 |
+| 효율성 | 가정 맞으면 BLUE | OLS와 동일 (효율성 개선 없음) |
 | 가정 틀리면 | 더 나빠질 수 있음 | 최소한 SE는 올바름 |
 | 실용성 | 오차 구조 명확할 때 | 구조 불확실하거나 보수적으로 갈 때 |
 
-### 로버스트 SE가 고치는 것과 고치지 않는 것
+---
+
+### 로버스트 SE 가 고치는 것과 고치지 않는 것
 
 $$t = \frac{\hat{\beta}_{OLS}}{SE(\hat{\beta}_{OLS})}$$
 
 - 분자 $\hat{\beta}_{OLS}$ → **건드리지 않음**
 - 분모 $SE(\hat{\beta}_{OLS})$ → **올바른 공식으로 교체**
-
-즉 로버스트 SE는 추정의 효율성이나 $\hat{\beta}$의 정확성을 개선하는 게 아니라, **t검정이 제대로 작동하게 만드는 것**이 전부다.
 
 | | 개선하는가 |
 |---|---|
@@ -320,122 +346,117 @@ $$t = \frac{\hat{\beta}_{OLS}}{SE(\hat{\beta}_{OLS})}$$
 | $\hat{\beta}$ 효율성 | ✗ |
 | 검정의 신뢰성 | **✓** |
 
+---
+
 ### 핵심 트레이드오프
 
 - GLS/FGLS: 오차 구조를 **알고 활용** → 추정 효율성 개선, 가정이 틀리면 위험
-- 로버스트 SE: "추정은 포기하고 **검정만 제대로 하자**" → 효율성 포기, 대신 SE는 항상 올바름
+- Robust SE: "추정 효율성은 포기하고 **검정만 제대로 하자**" → SE 는 항상 올바름
 
-> **실무에서는** 오차 구조 확신이 없으면 로버스트 SE를 쓰는 게 안전하다. Stata에서 `vce(robust)` 또는 `vce(cluster id)` 옵션 하나로 해결된다.
+> **실무에서는** 오차 구조 확신이 없으면 로버스트 SE 가 안전. Stata 에서 `vce(robust)` 또는 `vce(cluster id)` 옵션 하나로 해결된다.
 
 ---
 
-## 10. FGLS와 로버스트 SE의 $\Omega$ — 같은 기호, 다른 사용법
+## 10. FGLS 와 Robust SE 의 $\Omega$ — 같은 기호, 다른 사용법
 
-기호는 둘 다 $\Omega$지만, **이론적 대상은 같고 쓰는 방식만 다르다.**
+기호는 둘 다 $\Omega$ 지만, **이론적 대상은 같고 쓰는 방식만 다르다.**
 
-### 진짜 $\Omega$의 의미
+### $\Omega$ 의 의미
 
-회귀모형 $y = X\beta + u$에서:
-
-$$\Omega = Var(u \mid X)$$
+$$\Omega = \text{Var}(\epsilon \mid X)$$
 
 오차항 전체의 분산-공분산 행렬. GLS·FGLS·로버스트 모두 동일한 대상을 가리킨다.
 
-### 같은 $\hat{\Omega}$이라도 쓰는 방식이 다르다
+### 같은 $\hat{\Omega}$ 이라도 쓰는 방식이 다르다
 
-이분산만 가정하면 둘 다 다음 형태를 쓸 수 있다:
-
-$$\hat{\Omega} = \text{diag}(\hat{u}_1^2, \hat{u}_2^2, \ldots, \hat{u}_T^2)$$
-
-| | FGLS | 로버스트 SE |
+| | FGLS | Robust SE |
 |---|---|---|
-| $\hat{\Omega}$ 사용 | $\hat{\Omega}^{-1}$을 데이터에 직접 곱함 | $X^T\hat{\Omega}X$ 덩어리로 합산 후 SE 공식에 대입 |
-| 영향 | $\hat{\beta}$ 자체가 바뀜 | $\hat{\beta}$ 그대로, SE만 바뀜 |
-| 개별 $\hat{u}_i^2$의 신뢰도 | 매우 중요 | 합산에서 흡수되니 덜 중요 |
+| $\hat{\Omega}$ 사용 | $\hat{\Omega}^{-1}$ 을 데이터에 직접 곱함 | $X^\top \hat{\Omega} X$ 덩어리로 합산 후 SE 공식에 대입 |
+| 영향 | $\hat{\beta}$ 자체가 바뀜 | $\hat{\beta}$ 그대로, SE 만 바뀜 |
+| 개별 $\hat{\epsilon}_i^2$ 신뢰도 | 매우 중요 ($\hat{\Omega}^{-1}$ 폭발 위험) | 합산에서 흡수되니 덜 중요 |
+| 처리하는 이분산 (차이점) | 개체 간 이분산을 **재가중**까지 함 (효율성 개선) | 개체 간 이분산을 **SE에만 반영** (효율성 개선 X) |
 
 ### 신뢰도 요구 수준의 차이
 
-**로버스트 SE:**
-- $\hat{u}_i^2$ 개별 값이 부정확해도 OK
-- 어차피 $\sum_i \hat{u}_i^2 x_i x_i^T$로 **합산**되니까 평균적으로만 맞으면 됨
+**Robust SE:**
+- $\hat{\epsilon}_i^2$ 개별 값이 부정확해도 OK
+- $\sum_i \hat{\epsilon}_i^2 x_i x_i^\top$ 로 **합산**되니 평균적으로만 맞으면 됨
 - 개별 부정확성이 합산에서 상쇄
 
 **FGLS:**
-- $\hat{\Omega}^{-1}$이 데이터에 **직접 곱해짐**
-- 우연히 $\hat{u}_i^2$가 작으면 → $1/\hat{u}_i^2$ 폭발 → 그 관측치 가중치 폭증
-- 그래서 단순 $\text{diag}(\hat{u}_i^2)$ 대신 보통 **구조 가정**을 더해 부드럽게 추정 ($\sigma_i^2 = \sigma^2 z_i^\gamma$ 등)
+- $\hat{\Omega}^{-1}$ 이 데이터에 **직접 곱해짐**
+- 우연히 $\hat{\epsilon}_i^2$ 가 작으면 → $1/\hat{\epsilon}_i^2$ 폭발 → 그 관측치 가중치 폭증
+- 그래서 단순 $\text{diag}(\hat{\epsilon}_i^2)$ 대신 보통 **구조 가정**을 더해 부드럽게 추정 ($\sigma_i^2 = \sigma^2 z_i^\gamma$ 등)
 
 ### 핵심 한 줄
 
 | | 역할 |
 |---|---|
-| **GLS** | $\Omega$를 "알고 있다"고 가정 |
-| **FGLS** | $\Omega$를 **회귀 재추정**에 씀 — 역행렬 취해서 데이터에 곱함 |
-| **로버스트 SE** | $\Omega$를 **분산 계산**에만 씀 — 합산 덩어리로 SE 공식에만 끼움 |
+| **GLS** | $\Omega$ 를 "알고 있다"고 가정 (이론으로 직접 지정) |
+| **FGLS** | $\Omega$ 를 **회귀 재추정에 씀** — 역행렬 취해서 데이터에 곱함 |
+| **Robust SE** | $\Omega$ 를 **분산 계산에만 씀** — 합산 덩어리로 SE 공식에만 끼움 |
 
-**전략별 정리**
- 
+### 전략별 정리
+
 | 방법 | $\hat{\beta}$ | $\Omega$ 처리 | 효율성 | 안전성 |
 |---|---|---|---|---|
 | OLS | 불편, 비효율 | 무시 ($\Omega = I$ 전제) | 낮음 | $\hat{\beta}$ 불편 보장 |
-| WLS | BLUE | 대각 $\Omega$ 알고 있음 (이분산만) | 높음 | 가정 필요 |
+| WLS | BLUE | 대각 $\Omega$ 알고 있음 (이분산만, 무상관) | 높음 | 가정 필요 |
 | GLS | BLUE | 완전한 $\Omega$ 알고 있음 | 최고 | 가정 필요 |
 | FGLS | 점근적 BLUE | $\hat{\Omega}$ 잔차로 추정 후 대입 | 점근적 | 소표본 위험 |
 | Robust SE | OLS와 동일 | 구조 가정 없이 잔차로 SE만 교정 | OLS와 동일 | 강건 |
- 
+
 ---
 
-## 11. FGLS가 현대 실무에서 덜 권장되는 이유
+## 11. FGLS 가 현대 실무에서 덜 권장되는 이유
 
-> 옛날엔 FGLS가 정석이었지만, 지금은 OLS + 로버스트 SE가 표준이다.
+> 옛날엔 FGLS 가 정석이었지만, 지금은 OLS + Robust SE 가 표준이다.
 
 ### ① 구조 가정의 위험
 
-FGLS는 $\Omega$ 구조를 가정해야 한다 (AR(1), 모수적 이분산 등). 가정이 틀리면:
-
 | | 가정 맞을 때 | 가정 틀릴 때 |
 |---|---|---|
-| OLS + 로버스트 SE | 효율성 낮지만 SE 올바름 | SE 여전히 올바름 |
-| FGLS | BLUE | **$\hat{\beta}$ 편향 가능, SE도 틀림** |
+| OLS + Robust SE | 효율성 낮지만 SE 올바름 | SE 여전히 올바름 |
+| FGLS | BLUE | **$\hat{\beta}$ 편향 가능, SE 도 틀림** |
 
-OLS의 $\Omega = I$ 가정이 틀려도 $\hat{\beta}$는 불편이라 대가가 작지만, FGLS는 $\hat{\Omega}^{-1}$이 데이터에 직접 곱해지므로 가정 위반이 추정량에 직격탄이 된다.
+OLS 의 $\Omega = I$ 가정이 틀려도 $\hat{\beta}$ 는 불편이라 대가가 작다.
+
+FGLS 는 $\hat{\Omega}^{-1}$ 이 데이터에 직접 곱해지므로 **가정 위반이 추정량에 직격탄**.
 
 ### ② 소표본 불안정성
 
-FGLS는 **점근적으로만** 효율적이다. 소표본에서는:
-- $\hat{\Omega}$이 부정확
+FGLS 는 **점근적으로만** 효율적:
+
+- $\hat{\Omega}$ 이 부정확
 - 역행렬 취하면 불안정성 폭증
-- $\hat{\beta}_{FGLS}$가 OLS보다 분산이 더 클 수 있음
+- $\hat{\beta}_{FGLS}$ 가 OLS 보다 분산이 더 클 수 있음
 
 ### ③ $\hat{\Omega}^{-1}$ 폭발 위험
 
-잔차 하나로 $\sigma_i^2$ 추정 후 역행렬:
-
-$$\frac{1}{\hat{\sigma}_i^2} \rightarrow \text{잔차 우연히 작으면 폭발}$$
-
-특정 관측치 가중치가 비정상적으로 커지면 $\hat{\beta}$가 그 관측치에 끌려간다.
+잔차 우연히 작으면 $1/\hat{\sigma}_i^2$ 폭발 → 그 관측치 가중치 비정상 증가 → $\hat{\beta}$ 왜곡
 
 ### ④ 현대 응용계량경제학의 철학
 
 > "약간의 효율성 손해는 감수해도, 가정 위반으로 인한 편향은 절대 피하자"
 
-효율성보다 **일관성·강건성**을 우선시하는 흐름. 로버스트 SE는 이 철학에 부합한다.
+### ⑤ OLS 도 사실 구조 가정 — 근데 왜 FGLS 만 문제냐
 
-### ⑤ OLS도 사실 구조 가정 — 근데 왜 FGLS만 문제냐
+OLS 의 $\Omega = I$ 도 엄밀히는 구조 가정이지만, **가정이 틀려도 $\hat{\beta}$ 가 불편**이라 대가가 작다.
 
-OLS의 $\Omega = I$도 엄밀히는 구조 가정이지만, **가정이 틀려도 $\hat{\beta}$가 불편**이라 대가가 작다. FGLS의 구조 가정은 **$\hat{\beta}$ 자체에 영향**을 미치므로 더 위험하다.
+FGLS 의 구조 가정은 **$\hat{\beta}$ 자체에 영향**을 미치므로 더 위험하다.
 
-> **예외:** 패널 + 개체 간 이분산만 가정한 FGLS는 자유도 충분 + 가정 단순으로 비교적 안전. Stata `xtgls panel(hetero)`이 자주 쓰이는 이유.
+> **예외:** 패널 + 개체 간 이분산만 가정한 FGLS 는 자유도 충분 + 가정 단순으로 비교적 안전. Stata `xtgls panel(hetero)` 이 자주 쓰이는 이유.
 
 ---
 
 ## 한 줄 정리
 
 - **OLS** — 오차 구조 무시, $\hat{\beta}$ 불편이지만 SE 틀림
-- **GLS** — 오차 구조를 AR(1) 등 특정 형태로 **가정**하고, 파라미터($\rho$ 등)를 잔차로 추정해 $\Omega^{-1/2}$ 변환 후 OLS
-- **FGLS** — $\Omega$를 완전히 특정할 수 없으므로 잔차로 $\hat{\Omega}$ 추정 후 대입하는 현실적 GLS
-- **로버스트 SE** — $\hat{\beta}$는 OLS 그대로, $\Omega$ 구조 가정 없이 잔차로 분산만 직접 근사
+- **WLS** — 이분산만 존재할 때 $\Omega$ 를 이론으로 지정, 분산 역수로 가중
+- **GLS** — 완전한 $\Omega$ 구조를 **이론으로 직접 지정**, $\Omega^{-1/2}$ 변환 후 OLS → BLUE
+- **FGLS** — $\Omega$ 모르므로 잔차로 $\hat{\sigma}_i^2$, $\hat{\rho}$ 등 추정 후 대입하는 현실적 GLS
+- **Robust SE** — $\hat{\beta}_{OLS}$ 그대로, $\Omega$ 구조 가정 없이 잔차로 SE 만 교정
 
-$$\text{OLS} \xrightarrow{\Omega \neq I} \begin{cases} \text{구조 가정 가능} & \rightarrow \text{FGLS} \\ \text{구조 불확실} & \rightarrow \text{로버스트 SE} \end{cases}$$
+$$\text{OLS} \xrightarrow{\Omega \neq I} \begin{cases} \text{구조 가정 가능 + 효율성 개선 원함} & \rightarrow \text{FGLS} \\ \text{구조 불확실 or 보수적} & \rightarrow \text{Robust SE} \end{cases}$$
 
-> $\hat{\beta}$는 살리고 오차 구조를 반영해 **SE를 교정하거나 추정 자체를 개선**하는 것이 핵심 — 가정의 확신 정도에 따라 방법을 선택한다.
+> $\hat{\beta}$ 는 살리고 오차 구조를 반영해 **SE 를 교정하거나 추정 자체를 개선**하는 것이 핵심 — 가정의 확신 정도에 따라 방법을 선택한다.
