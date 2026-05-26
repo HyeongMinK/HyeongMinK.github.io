@@ -1,5 +1,5 @@
 ---
-title: 3. Backpropagation — 오차를 거꾸로 흘려보내는 법
+title: 3. Backpropagation
 date: 2026-05-26
 tags:
   - Backpropagation

@@ -1,5 +1,5 @@
 ---
-title: 1. 뉴럴넷은 왜 필요한가 — 비선형성은 수단이다
+title: 1. Neural Network는 왜 필요한가
 date: 2026-05-26
 tags:
   - Neural Network
@@ -8,7 +8,7 @@ tags:
   - Activation Function
 ---
 
-# 뉴럴넷은 왜 필요한가 — 비선형성은 수단이다
+# Neural Network는 왜 필요한가
 
 딥러닝을 공부하다 보면 한 번쯤 이런 생각이 든다.
 
