@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "ATE (Average Treatment Effect) — 인과추론의 핵심 개념"
+title: "1. ATE (Average Treatment Effect)"
 date: 2026-05-26 00:00:00 +0900
 categories: [Causal Inference, Econometrics]
 tags: [ATE, ATT, Potential Outcome, Selection Bias, Causal Inference, 인과추론]
