@@ -35,6 +35,8 @@ $$\frac{\partial J}{\partial \theta_j} = (h_\theta - y) \cdot x_j$$
 
 그런데 레이어가 여러 개면, $\Theta^{(1)}$의 gradient를 구하려면 $J \to z^{(4)} \to z^{(3)} \to z^{(2)} \to \Theta^{(1)}$ 전체 경로를 타야 한다. 더 문제는 이 중간 계산이 파라미터마다 반복된다는 것이다. Backpropagation은 이 반복을 $\delta$로 묶어서 한 번만 계산하는 알고리즘이다.
 
+![Back propagation](../images/back_pro.png)
+
 ---
 
 ## δ — 중간 재료
