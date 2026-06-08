@@ -8,7 +8,7 @@ tags:
   - Notation
 ---
 
-# Neural Network 표기법과 Forward Propagation
+# Neural Network 표기법과 Forward Propagations
 
 지난 글에서 뉴럴넷의 진짜 목적이 representation learning이라는 걸 살펴봤다. 이번엔 그 계산이 구체적으로 어떻게 이루어지는지를 들여다본다. 수식이 처음엔 낯설어 보이지만, 구조를 파악하면 단순하다.
 
