@@ -79,6 +79,8 @@ $\Sigma_{ij} = \Sigma_{ji}$ 이므로 항상 **symmetric**. Spectral Theorem에 
 
 Full rank는 보장되지 않는다. $p > n$ 이면 $X$의 열벡터 $p$개가 $n$차원 공간 안에 있으므로 rank가 최대 $n$까지밖에 안 올라간다. $p \times p$ 행렬이 full rank가 되려면 rank $= p$ 여야 하는데 불가능. 변수 간 완전한 선형관계가 있을 때도 마찬가지다. 이 경우 $\lambda = 0$인 고유값이 생기는데, 그 방향은 분산이 없다는 뜻이므로 PCA에서 자연스럽게 제거된다. 따라서 $\Sigma$는 **positive semi-definite (PSD)**, 즉 $\mathbf{v}^T \Sigma \mathbf{v} \geq 0$.
 
+column space 관점에서 보면 더 명확하다. $\Sigma\mathbf{v}$의 결과는 항상 $\Sigma$의 column space 안에 있고, column space의 차원 = rank $= r$이다. $p > n$이면 $r \leq n < p$ 이므로 $\Sigma$는 $p$차원 공간을 최대 $n$차원 부분공간으로 찌그러뜨린다. 나머지 $p - r$개 방향은 $\Sigma$가 $\mathbf{0}$으로 보내버리는데, 그 방향들이 바로 $\lambda = 0$인 고유벡터들이다 — null space와 column space의 orthogonal complement가 일치하기 때문이다. full rank이면 null space $= \{\mathbf{0}\}$이므로 $\lambda = 0$인 고유값 자체가 존재할 수 없다.
+
 **$\lambda_k$ 가 분산인 이유**
 
 고유벡터를 단위벡터로 정규화($\|\mathbf{e}_k\| = 1$)한 후, 데이터를 $\mathbf{e}_k$ 방향으로 투영하면:
