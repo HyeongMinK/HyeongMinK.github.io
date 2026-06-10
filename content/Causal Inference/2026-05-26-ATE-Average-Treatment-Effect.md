@@ -2,7 +2,7 @@
 layout: post
 title: "1. ATE (Average Treatment Effect)"
 date: 2026-05-26 00:00:00 +0900
-categories: [Causal Inference, Econometrics]
+categories: [Causal inference, Econometrics]
 tags: [ATE, ATT, Potential Outcome, Selection Bias, Causal Inference, 인과추론]
 math: true
 toc: true
