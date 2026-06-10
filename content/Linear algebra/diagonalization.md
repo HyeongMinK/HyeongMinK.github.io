@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "2. 행렬 대각화: 조건, 충분조건, 직교성"
-date: 2026-06-10
+title: "행렬 대각화: 조건, 충분조건, 직교성"
+date: 2025-01-01
 categories: [linear-algebra]
 tags: [eigenvalue, eigenvector, diagonalization, symmetric-matrix]
 ---
@@ -118,13 +118,37 @@ $$\boxed{A = \lambda_1 q_1 q_1^\top + \lambda_2 q_2 q_2^\top + \lambda_3 q_3 q_3
 
 각 항 $q_i q_i^\top$은 열벡터 × 행벡터 = **rank-1 행렬**이다. 즉 $A$는 rank-1 행렬들의 가중합으로 완전히 분해된다 — 가중치가 바로 고유값 $\lambda_i$.
 
+![혁펜하임](images/spectral.png)
+
 **PCA에서의 의미**: 상위 $k$개 항만 남기면:
 
 $$A \approx \sum_{i=1}^{k} \lambda_i q_i q_i^\top$$
 
 $\lambda_i$가 클수록 해당 rank-1 성분이 $A$를 많이 설명한다. 이것이 **저차원 근사(low-rank approximation)** 의 원리이고, PCA에서 주성분 $k$개만 남기는 것과 정확히 같은 논리다.
 
-![혁펜하임](images/spectral.png)
+#### $Ax$를 고유벡터 기저로 바라보기
+
+$A = \sum_i \lambda_i q_i q_i^\top$에 벡터 $x$를 곱하면:
+
+$$Ax = \lambda_1 q_1 (q_1^\top x) + \lambda_2 q_2 (q_2^\top x) + \lambda_3 q_3 (q_3^\top x)$$
+
+괄호 안 $q_i^\top x$가 무슨 의미인지 먼저 보자.
+
+내적의 기하학적 의미는 $q_i^\top x = \|q_i\|\|x\|\cos\theta$인데, $q_i$는 직교행렬 $Q$의 열벡터라서 **단위벡터** ($\|q_i\| = 1$)가 보장된다. 그러면:
+
+$$q_i^\top x = \|x\|\cos\theta$$
+
+이게 바로 **$x$를 $q_i$ 방향으로 정사영했을 때의 길이**다. 단위벡터가 아니었으면 $\|q_i\|$가 남아서 순수한 성분 크기가 나오지 않는다.
+
+그러면 $q_i(q_i^\top x)$는 그 길이만큼 $q_i$ 방향으로 뻗은 벡터 — 즉 **$x$의 $q_i$ 방향 성분**이다.
+
+결국 $Ax$를 계산한다는 건 다음 세 단계다:
+
+- **① project**: $x$를 각 고유벡터 $q_i$ 방향으로 정사영해서 성분을 뽑는다 → $q_i^\top x$
+- **② scale**: 각 성분을 해당 고유값 $\lambda_i$만큼 늘이거나 줄인다 → $\lambda_i (q_i^\top x)$
+- **③ 합산**: 스케일된 성분들을 다시 더해서 최종 벡터를 만든다 → $\sum_i \lambda_i q_i (q_i^\top x)$
+
+행렬 $A$가 벡터 $x$에 복잡하게 작용하는 것처럼 보여도, 고유벡터 기저에서 보면 결국 **방향별로 쪼개서 → 각각 스케일하고 → 다시 합치는** 단순한 작업이다.
 
 ---
 
