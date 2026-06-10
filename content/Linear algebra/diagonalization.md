@@ -2,7 +2,7 @@
 layout: post
 title: "2. 행렬 대각화: 조건, 충분조건, 직교성"
 date: 2026-06-10
-categories: [linear-algebra]
+categories: [Linear algebra]
 tags: [eigenvalue, eigenvector, diagonalization, symmetric-matrix]
 ---
 
