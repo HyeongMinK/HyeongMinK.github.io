@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "1. 고유값, 고유벡터, 그리고 PCA"
+title: "1. 고유값, 고유벡터, 그리고 PCA 개요"
 date: 2026-06-08 21:00:00 +0900
 categories: [Linear Algebra]
 tags: [Eigenvalue, Eigenvector, PCA, Eigendecomposition, Null Space, 선형대수, 고유값, 고유벡터]
