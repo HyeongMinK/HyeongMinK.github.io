@@ -45,13 +45,57 @@ $$A^{100} \mathbf{e} = \lambda^{100} \mathbf{e}$$
 
 $\lambda$의 거듭제곱만 계산하면 끝이다. 이게 가능한 이유는 **대각화(diagonalization)** 때문이다.
 
-$$A = P \Lambda P^{-1} \implies A^n = P \Lambda^n P^{-1}$$
+$$A = V \Lambda V^{-1} \implies A^n = V \Lambda^n V^{-1}$$
 
-$P^{-1}P = I$ 가 계속 소거되어 $\Lambda^n$ 만 남는다. 대각행렬의 거듭제곱은 각 원소를 $n$제곱하면 끝.
+$V^{-1}V = I$ 가 계속 소거되어 $\Lambda^n$ 만 남는다. 대각행렬의 거듭제곱은 각 원소를 $n$제곱하면 끝.
 
 $$\Lambda^n = \begin{bmatrix} \lambda_1^n & 0 \\ 0 & \lambda_2^n \end{bmatrix}$$
 
 장기 거동은 절댓값이 가장 큰 $\lambda$의 고유벡터 방향이 지배한다 — 이를 지배 고유벡터(dominant eigenvector)라고 한다.
+
+#### Eigendecomposition의 좋은 점 5가지
+
+대각화 $A = V\Lambda V^{-1}$가 성립할 때 얻는 이점들이다.
+
+**① 거듭제곱: $A^k = V\Lambda^k V^{-1}$**
+
+$$A^k = \underbrace{(V\Lambda V^{-1})(V\Lambda V^{-1})\cdots(V\Lambda V^{-1})}_{k\text{번}} = V\Lambda^k V^{-1}$$
+
+중간의 $V^{-1}V = I$가 모두 소거되어 $\Lambda$만 $k$번 거듭제곱하면 된다. $\Lambda^k = \text{diag}(\lambda_1^k, \lambda_2^k, \ldots, \lambda_n^k)$이므로 계산 비용이 극적으로 줄어든다.
+
+$$\begin{bmatrix} \lambda_1 & \\ & \lambda_2 \end{bmatrix}^k = \begin{bmatrix} \lambda_1^k & \\ & \lambda_2^k \end{bmatrix}$$
+
+**② 역행렬: $A^{-1} = V\Lambda^{-1}V^{-1}$**
+
+$A = V\Lambda V^{-1}$의 양변을 역행렬로 뒤집으면:
+
+$$A^{-1} = (V\Lambda V^{-1})^{-1} = V\Lambda^{-1}V^{-1}$$
+
+$\Lambda^{-1} = \text{diag}(1/\lambda_1, 1/\lambda_2, \ldots, 1/\lambda_n)$이므로, $A$의 역행렬을 구하는 문제가 스칼라의 역수 계산으로 줄어든다. 단, 모든 $\lambda_i \neq 0$이어야 역행렬이 존재한다.
+
+**③ 행렬식: $\det(A) = \prod_{i} \lambda_i$**
+
+$$\det(A) = \det(V\Lambda V^{-1}) = \det(V)\det(\Lambda)\det(V^{-1}) = \det(\Lambda) = \prod_{i=1}^{n} \lambda_i$$
+
+$\det(V)\det(V^{-1}) = \det(VV^{-1}) = \det(I) = 1$이므로 소거된다. 대각행렬의 행렬식은 대각 원소의 곱.
+
+**④ 대각합: $\text{tr}(A) = \sum_{i} \lambda_i$**
+
+$$\text{tr}(A) = \text{tr}(V\Lambda V^{-1}) = \text{tr}(\Lambda V^{-1}V) = \text{tr}(\Lambda) = \sum_{i=1}^{n} \lambda_i$$
+
+trace의 순환 성질 $\text{tr}(ABC) = \text{tr}(CAB)$를 이용해 $V^{-1}V = I$로 소거. trace는 닮음 변환에 불변이므로, 어떤 기저로 표현하든 $A$의 trace는 고유값의 합과 같다.
+
+**⑤ rank-deficiency 판별: $\text{rank-deficient} \iff \det(A) = 0 \iff \lambda_i = 0$인 고유값 존재**
+
+③에서 $\det(A) = \prod \lambda_i$이므로:
+
+$$\det(A) = 0 \iff \text{어떤 } \lambda_i = 0$$
+
+$\det(A) = 0$은 $A$가 full rank가 아님과 동치이다. 즉, **$\lambda = 0$인 고유값이 존재한다는 것은 그 방향으로 $A$가 공간을 찌그러뜨린다는 뜻**이며, 해당 고유벡터들이 null space를 구성한다. PCA에서 $\lambda = 0$인 성분을 버리는 것도 같은 맥락 — 그 방향에는 분산이 없다.
+
+![혁펜하임](images/eigendecomposition.png)
+
+---
 
 ### 동기 2: 분해와 압축 (PCA)
 
@@ -175,7 +219,7 @@ $$(A - 2I)\mathbf{x} = \begin{bmatrix} 1 & 1 \\ 0 & 0 \end{bmatrix} \mathbf{x} =
 
 **대각화와 $A^n$**
 
-$$A^n = P \Lambda^n P^{-1}, \quad \Lambda^n = \begin{bmatrix} \lambda_1^n & 0 \\ 0 & \lambda_2^n \end{bmatrix}$$
+$$A^n = V \Lambda^n V^{-1}, \quad \Lambda^n = \begin{bmatrix} \lambda_1^n & 0 \\ 0 & \lambda_2^n \end{bmatrix}$$
 
 **Eigenspace**
 
