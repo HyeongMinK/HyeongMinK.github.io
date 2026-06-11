@@ -78,7 +78,7 @@ $$\min_u (-u^\top R_d u) \iff \max_u (u^\top R_d u)$$
 
 **재구성 오차 최소화 = 분산 최대화**가 동치다.
 
-![혁펜하임](images/pca.png)
+![혁펜하임](images/PCA.png)
 
 ---
 
