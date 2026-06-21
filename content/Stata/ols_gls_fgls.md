@@ -17,8 +17,44 @@ $$Y_{it} = \alpha + \beta X_{it} + \epsilon_{it}$$
 | 3 | $Cov(\epsilon_{it}, \epsilon_{js}) = 0$ | Best (무상관) | 표준오차 틀림 |
 | 4 | $Cov(X_{it}, \epsilon_{it}) = 0$ | Unbiased | 추정량 편향 (내생성) |
 
-> **BLUE** = Best Linear Unbiased Estimator
+> **BLUE** = Best Linear Unbiased Estimator  
 > 가정 1·4 → 불편성 보장 / 가정 2·3 → 효율성(최소분산) 보장
+
+---
+
+### BLUE 각 단어 분해
+
+| 단어 | 의미 | 수식 |
+|---|---|---|
+| **B**est | 모든 선형 불편 추정량 중 **분산 최소** | $Var(\hat{\beta}_{OLS}) \leq Var(\tilde{\beta})$, $\forall \tilde{\beta}$ 선형 불편 |
+| **L**inear | $\hat{\beta}$가 $Y$의 **선형 함수** | $\hat{\beta} = (X^\top X)^{-1}X^\top Y = CY$ |
+| **U**nbiased | 기댓값이 **참값** | $E(\hat{\beta}) = \beta$ |
+| **E**stimator | 데이터로 계산하는 **통계량** | $\hat{\beta} = f(X, Y)$ |
+
+> **Best**는 가정 2·3이, **Unbiased**는 가정 1·4가 보장 — 서로 독립적으로 작동한다.
+
+---
+
+### 각 가정이 깨지는 원인
+
+| 가정 | 깨지는 대표 원인 |
+|---|---|
+| 1. $E(\varepsilon_{it}) = 0$ | 절편 누락, 함수형태 오설정 (실제 비선형인데 선형 모형 사용) |
+| 2. $Var(\varepsilon_{it}) = \sigma^2$ | 소득·기업 규모 등 스케일 변수 포함 시 큰 값일수록 분산 커짐 |
+| 3. $Cov(\varepsilon_{it}, \varepsilon_{js}) = 0$ | 시계열 데이터의 관성(AR 구조), 공간적으로 인접한 개체 간 파급효과 |
+| 4. $Cov(X_{it}, \varepsilon_{it}) = 0$ | 역인과(동시결정), 누락변수, 측정오차 |
+
+---
+
+### 직관적 예시 (크라우드펀딩 패널 기준)
+
+**가정 1 위반** — 플랫폼이 특정 카테고리 프로젝트만 노출 → 노출 여부에 체계적 패턴 → 오차 평균이 0이 아님
+
+**가정 2 위반** — 누적 펀딩액이 클수록 일별 변동폭도 커짐 → 고액 프로젝트일수록 $\varepsilon_{it}$ 분산이 큼
+
+**가정 3 위반** — 오늘 화제된 프로젝트는 내일도 화제 → $\varepsilon_{it}$와 $\varepsilon_{i,t+1}$ 양의 상관
+
+**가정 4 위반** — $\text{on\_page}_{it}$는 플랫폼이 **잘 되고 있는 프로젝트**를 선택해 노출 → $X_{it}$와 $\varepsilon_{it}$ 상관 → 내생성
 
 ---
 
